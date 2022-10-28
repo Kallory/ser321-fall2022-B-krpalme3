@@ -1,0 +1,54 @@
+apply plugin: 'application'
+apply plugin: 'java'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.json', name: 'json', version: '20200518'
+}
+description = "Client Server Socket TCP"
+
+def port = 8080
+def host = 'localhost'
+
+task runServer(type: JavaExec) {
+    group 'TCP Server/Client'
+    description 'Creates Server socket'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'tcp/Server'
+    standardInput = System.in
+
+    if (project.hasProperty("port")) {
+        args project.getProperty('port')
+    } else args port
+}
+
+task runClient(type: JavaExec) {
+    group 'TCP Server/Client'
+    description 'Creates client socket'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'tcp/Client'
+    standardInput = System.in
+
+    if (project.hasProperty("port") && project.hasProperty("host")) {
+        args(project.getProperty('port'), project.getProperty('host'))
+    } else if (project.hasProperty("port")) {
+        args(project.getProperty('port'))
+        args host
+    } else if (project.hasProperty("host")) {
+        args port
+        args(project.getProperty('host'))
+    } else {
+        args port
+        args host
+    }
+}
