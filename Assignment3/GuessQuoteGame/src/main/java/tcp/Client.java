@@ -2,7 +2,8 @@ package tcp;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
@@ -31,7 +32,7 @@ public class Client implements OutputPanel.EventHandlers {
     JDialog frame;
     PicturePanel picturePanel;
     OutputPanel outputPanel;
-
+    static OutputStream out;
     /**
      * Construct dialog
      */
@@ -75,9 +76,12 @@ public class Client implements OutputPanel.EventHandlers {
      * Creates a new game and set the size of the grid
      * @param dimension - the size of the grid will be dimension x dimension
      */
-    public void newGame(int dimension) {
+    public void newGame(int dimension, NetworkHelper networkHelper) throws IOException {
         picturePanel.newGame(dimension);
         outputPanel.appendOutput("Started new game with a " + dimension + "x" + dimension + " board.");
+        String msg = getServerMsg(networkHelper.getIn());
+        System.out.println("got message: " + msg);
+        outputPanel.appendOutput(msg);
     }
 
     /**
@@ -124,6 +128,8 @@ public class Client implements OutputPanel.EventHandlers {
         if (input.length() > 0) {
             // append input to the output panel
             outputPanel.appendOutput(input);
+            PrintWriter writer = new PrintWriter(out, true);
+            writer.println(input);
             // clear input text box
             outputPanel.setInputText("");
         }
@@ -141,20 +147,70 @@ public class Client implements OutputPanel.EventHandlers {
         }
     }
 
+    public String getServerMsg(InputStream input) throws IOException{
+        int bufLen = 1024;
+        byte[] bytesReceived = new byte[bufLen];
+
+        String strReceived = "";
+        try {
+            //Reader reader = new InputStreamReader(input);
+            System.out.println("Waiting on input");
+            strReceived = getStrReceived(input, bufLen, bytesReceived);
+            outputPanel.appendOutput(strReceived);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return strReceived;
+    }
+
+    private String getStrReceived(InputStream input, int bufLen, byte[] bytesReceived) throws IOException {
+        int numBytesReceived = input.read(bytesReceived, 0, bufLen);
+        String strReceived = new String(bytesReceived, 0, numBytesReceived);
+        System.out.println("strReceived " + strReceived);
+        return strReceived;
+    }
+
+
     public static void main(String[] args) throws IOException {
+        InputStream in = null;
+        Socket sock;
+        int port = 0;
+        String host = "";
+        NetworkHelper networkHelper = new NetworkHelper();
+
+        try {
+            if (args[0] != null) port = Integer.parseInt(args[0]);
+            else port = 8080;
+            if (args[1] != null) host = args[1];
+            else host = "localhost";
+
+            System.out.println("Connecting to port: " + port);
+            System.out.println("Connecting to host: " + host);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Port must be an integer");
+            System.exit(2);
+        }
+
+        try {
+            sock = new Socket(host, port);
+            out = sock.getOutputStream();
+            in = sock.getInputStream();
+            networkHelper = new NetworkHelper(out, in, sock, port, host);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         // create the frame
         Client main = new Client();
-
-
+        System.out.println("clientObject initiated");
 
         // set up the UI to display on image
-        main.newGame(1);
-
+        main.newGame(1, networkHelper);
+        System.out.println("new game initiated");
         // add images to the grid
-        main.insertImage("img/Jack_Sparrow/quote4.png", 0, 0);
-
-
-
+//        main.insertImage("img/Jack_Sparrow/quote4.png", 0, 0);
 
         // show the GUI dialog as modal
         main.show(true); // you should not have your logic after this. Your main logic should happen whenever "submit" is clicked

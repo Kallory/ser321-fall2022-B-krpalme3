@@ -146,7 +146,7 @@ public class PicturePanel extends JPanel {
             BufferedImage img = ImageIO.read(file);
             // create icon to display
             ImageIcon icon = new ImageIcon(img);
-            // do we need to setup the dimensions of all the containers?
+            // do we need to set up the dimensions of all the containers?
             handleFirstImage(icon.getIconWidth(), icon.getIconHeight());
             // insert image
             labels[row][col].setIcon(icon);
@@ -175,7 +175,7 @@ public class PicturePanel extends JPanel {
 
         // create icon to display
         ImageIcon icon = new ImageIcon(img);
-        // do we need to setup the dimensions of all the containers?
+        // do we need to set up the dimensions of all the containers?
         handleFirstImage(icon.getIconWidth(), icon.getIconHeight());
         // insert image
         labels[row][col].setIcon(icon);
