@@ -1,14 +1,10 @@
-package tcp;
+package udp;
 
-import com.sun.security.jgss.GSSUtil;
-import org.json.*;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Scanner;
 
 public class Server {
@@ -84,9 +80,17 @@ public class Server {
                     PrintWriter writer = new PrintWriter(out, true);
 
                     createFile();
+                    if (nameFlag == false) {
+                        os.writeObject("Please enter your name: ");
+                        nameFlag = true;
+                    }
+//                    writer.println("Please enter your name: ");
 
-                    os.writeObject("Please enter your name: ");
+//                    byte clientInput[] = new byte[bufLen];
+//                    int numBytesReceived = input.read(clientInput, 0, bufLen);
 
+//                    byte[] clientInput = NetworkUtils.receive(input);
+//
                     if (inOs != null) {
                         String jsonRequestString = (String) inOs.readObject();
                         JSONObject jsonRequest = new JSONObject(jsonRequestString);

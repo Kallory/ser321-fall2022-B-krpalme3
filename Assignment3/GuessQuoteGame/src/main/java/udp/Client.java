@@ -1,15 +1,11 @@
-package tcp;
+package udp;
+
 import org.json.JSONObject;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import javax.swing.JDialog;
-import javax.swing.WindowConstants;
 
 /**
  * The ClientGui class is a GUI frontend that displays an image grid, an input text box,
