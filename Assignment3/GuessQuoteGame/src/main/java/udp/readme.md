@@ -1,5 +1,5 @@
 Description - this project creates a guess the quote game by showing quotes from the server and allowing the
-user to guess who says the quote. It utilizes udp.
+user to guess who says the quote. It utili
 
 Requirements fulfilled:
 1 - connects to server
