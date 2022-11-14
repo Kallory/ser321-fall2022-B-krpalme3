@@ -32,12 +32,12 @@ public class Protocol {
 //        repeated string log = 1;
 //    }
 
-    public static Response createResponse(Response.ResponseType rt, int index, Entry leader, String board, String flipped, boolean second, boolean eval, String msg) {
+    public static Response createResponse(Response.ResponseType rt, Response.Builder res, String board, String flipped, boolean second, boolean eval, String msg) {
         Response response = Response.newBuilder()
                 .setResponseType(rt)
-                .addLeader(index, leader)
-                .setBoard(board)
                 .setFlippedBoard(flipped)
+                .addAllLeader(res.getLeaderList())
+                .setBoard(board)
                 .setSecond(second)
                 .setEval(eval)
                 .setMessage(msg)

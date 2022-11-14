@@ -3,7 +3,6 @@ package server;
 import java.net.*;
 import java.io.*;
 import java.util.*;
-import org.json.*;
 import java.lang.*;
 
 import buffers.RequestProtos.Request;
@@ -11,23 +10,25 @@ import buffers.RequestProtos.Logs;
 import buffers.RequestProtos.Message;
 import buffers.ResponseProtos.Response;
 import buffers.ResponseProtos.Entry;
-import utils.ClientManager;
+import org.json.JSONTokener;
 import utils.Protocol;
 
 public class SockBaseServer implements Runnable {
     static String logFilename = "logs.txt";
 
-    ServerSocket serv = null;
     InputStream in = null;
     OutputStream out = null;
-    Socket clientSocket = null;
+    Socket clientSocket;
     int port = 9099; // default port
     Game game;
-
+    Response response;
+    static int leaderEntryIndex = 0;
+    static Response.Builder res;
 
     public SockBaseServer(Socket sock, Game game){
         this.clientSocket = sock;
         this.game = game;
+        response = Protocol.createResponse(Response.ResponseType.GREETING, res, "", "", false, false, "");
         try {
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
@@ -40,12 +41,9 @@ public class SockBaseServer implements Runnable {
     // can handle multiple requests and does not crash when the server crashes
     // you can use this server as based or start a new one if you prefer. 
     public void run() {
-
-        String name = "";
-        Response response;
+        String name;
         Entry leaderEntry = null;
-        Boolean nameGotten = false;
-        System.out.println("Ready...");
+        boolean nameGotten = false;
         System.out.println("New client has connected on port: " + this.port);
         System.out.println("The new count is " + SockBaseServer.getClientCount());
         try {
@@ -53,11 +51,6 @@ public class SockBaseServer implements Runnable {
             while (true) {
                 Request op = Request.parseDelimitedFrom(in);
                 String result = null;
-                Entry leaderEx = Entry.newBuilder()
-                        .setName("")
-                        .setWins(1)
-                        .setLogins(1)
-                        .build();
                 // if the operation is NAME (so the beginning then say there is a connection and greet the client)
                 if (nameGotten == false && op.getOperationType() == Request.OperationType.NAME) {
                     // get name from proto object
@@ -66,21 +59,18 @@ public class SockBaseServer implements Runnable {
                     // writing a connection message to the log with name and CONNECT
                     writeToLog(name, Message.CONNECT);
                     System.out.println("Got a connection and a name: " + name);
-//                Response response = Response.newBuilder()
-//                .setResponseType(Response.ResponseType.GREETING)
-//                .setMessage("Hello " + name + " and welcome. Welcome to a simple game of battleship. ")
-//                .build();
                     String msg = "Hello " + name + " and welcome. Welcome to a simple game of battleship. ";
-
-                    response = Protocol.createResponse(Response.ResponseType.GREETING, 0, leaderEx, "", "", false, false, msg);
+                    Entry leader = Protocol.createEntry(name, 0, 0);
+                    res.addLeader(leader);
+                    res.build();
+                    response = Protocol.createResponse(Response.ResponseType.GREETING, res,"", "", false, false, msg);
                     response.writeDelimitedTo(out);
-                    leaderEntry = Protocol.createEntry(name, 0, 0);
                     nameGotten = true;
                 } else if (op.getOperationType() == Request.OperationType.LEADER) {
 
-                    response = Protocol.createResponse(Response.ResponseType.LEADER, 0, leaderEntry, "", "", false, false, "LeaderBoard:\n");
+                    response = Protocol.createResponse(Response.ResponseType.LEADER, res,"", "", false, false, "LeaderBoard:\n");
                     response.writeDelimitedTo(out);
-                    for (Entry lead: response.getLeaderList()){
+                    for (Entry lead: res.getLeaderList()){
                         System.out.println(lead.getName() + ": " + lead.getWins());
 
                     }
@@ -103,7 +93,7 @@ public class SockBaseServer implements Runnable {
 //            .setSecond(false)
 //            .build();
 //
-//            // this just temporarily unhides, the "hidden" image in game is still the same
+//            // this just temporarily un-hides, the "hidden" image in game is still the same
 //            System.out.println("One flipped tile");
 //            System.out.println(game.tempFlipWrongTiles(1,2));
 //
@@ -246,10 +236,10 @@ public class SockBaseServer implements Runnable {
     }
 
 
-    public static void main (String args[]) throws Exception {
+    public static void main (String[] args) throws Exception {
         Game game = new Game();
-        ClientManager clientManager;
-
+        res = Response.newBuilder()
+                .setResponseType(Response.ResponseType.LEADER);
         if (args.length != 2) {
             System.out.println("Expected arguments: <port(int)> <delay(int)>");
             System.exit(1);
@@ -272,13 +262,15 @@ public class SockBaseServer implements Runnable {
             e.printStackTrace();
             System.exit(2);
         }
-
-        clientSocket = serv.accept();
+        while (true) {
+            System.out.println("Accepting a request");
+            clientSocket = serv.accept();
 //        clientManager = new ClientManager(clientSocket);
-        SockBaseServer server = new SockBaseServer(clientSocket, game);
-        Thread t = new Thread(server);
-        t.start();
 
+            SockBaseServer server = new SockBaseServer(clientSocket, game);
+            Thread t = new Thread(server);
+            t.start();
+        }
     }
 }
 
