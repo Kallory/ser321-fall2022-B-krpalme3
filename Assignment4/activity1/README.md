@@ -36,7 +36,10 @@ error string: Should give good error message of what went wrong
 ### Terminal
 Base Code, please use the following commands:
 ```
-    For Server, run "gradle runServer -Pport=9099 -q --console=plain"
+    For Task1, run "gradle runTask1 -Pport=9099 -q --console=plain"
+    For Task2, run "gradle runTask2 -Pport=9099 -q --console=plain"
+    For Task1, run "gradle runTask3 -Pport=9099 -Plimit=5 -q --console=plain"
+    (change 5 to desired limit of max connections to the server)
 ```
 ```   
     For Client, run "gradle runClient -Phost=localhost -Pport=9099 -q --console=plain"

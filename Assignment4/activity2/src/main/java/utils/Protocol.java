@@ -22,15 +22,6 @@ public class Protocol {
         return logs;
     }
 
-//    enum Message { // this should be stored in log
-//        CONNECT = 0;
-//        START = 1;
-//        WIN = 2;
-//    }
-//
-//    message Logs {
-//        repeated string log = 1;
-//    }
 
     public static Response createResponse(Response.ResponseType rt, Response.Builder res, String board, String flipped, boolean second, boolean eval, String msg) {
         Response response = Response.newBuilder()
@@ -42,6 +33,8 @@ public class Protocol {
                 .setEval(eval)
                 .setMessage(msg)
                 .build();
+
+        //eval - true = match
 
         return response;
     }

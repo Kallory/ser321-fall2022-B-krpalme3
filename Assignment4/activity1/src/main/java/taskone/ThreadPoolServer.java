@@ -12,20 +12,19 @@ public class ThreadPoolServer {
     public static void main(String[] args)  {
         StringList strings = new StringList();
         int port;
-        //TODO get limit from gradle command line
         int limit = 30;
 
-        if (args.length != 1) {
+        if (args.length != 2) {
             // gradle runServer -Pport=8080 -q --console=plain
-            //TODO set default of 8080 and localhost instead of this message
-            System.out.println("Usage: gradle runServer -Pport=8080 -q --console=plain");
+            System.out.println("Usage: gradle runTask3 -Pport=8080 -Plimit=limitNumber -q --console=plain");
             System.exit(1);
         }
         port = -1;
         try {
             port = Integer.parseInt(args[0]);
+            limit = Integer.parseInt(args[1]);
         } catch (NumberFormatException nfe) {
-            System.out.println("[Port] must be an integer");
+            System.out.println("[Port], limit, must be an integer");
             System.exit(2);
         }
         try {

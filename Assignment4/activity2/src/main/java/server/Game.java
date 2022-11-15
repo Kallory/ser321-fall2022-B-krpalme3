@@ -9,7 +9,7 @@ import java.io.*;
  * Class can be used to hold the persistent state for a game for different threads
  * synchronization is not taken care of .
  * You can change this Class in any way you like or decide to not use it at all
- * I used this class in my SockBaseServer to create a new game and keep track of the current image evenon differnt threads. 
+ * I used this class in my SockBaseServer to create a new game and keep track of the current image even on different threads.
  * My threads each get a reference to this Game
  */
 
@@ -35,8 +35,6 @@ public class Game {
 
     /**
      * Sets the won flag to true
-     * @param args Unused.
-     * @return Nothing.
      */
     public void setWon(){
         won = true;
@@ -137,8 +135,6 @@ public class Game {
      * Shows the two chosen tiles and then hides them again. Returns the board with one showing.
      * @param tile1row
      * @param tile1col
-     * @param tile2row
-     * @param tile2col
      * @return String of board with the 1 tile showing
      */
     public String tempFlipWrongTiles(int tile1row, int tile1col) {
@@ -149,6 +145,28 @@ public class Game {
             sb.append("\n");
         }
         hidden[tile1row][tile1col] = '?';
+        return sb.toString();
+    }
+
+    public String flipTile(int row, int col) {
+        hidden[row][col] = original[row][col];
+        StringBuilder sb = new StringBuilder();
+        for (char[] subArray : hidden) {
+            sb.append(subArray);
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    public String unflipTile(int tile1row, int tile1col, int tile2row, int tile2col) {
+        hidden[tile1row][tile1col] = '?';
+        hidden[tile2row][tile2col] = '?';
+        StringBuilder sb = new StringBuilder();
+        for (char[] subArray : hidden) {
+            sb.append(subArray);
+            sb.append("\n");
+        }
+
         return sb.toString();
     }
 

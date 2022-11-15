@@ -16,7 +16,7 @@ public class ThreadedServer {
         if (args.length != 1) {
             // gradle runServer -Pport=8080 -q --console=plain
             //TODO set default of 8080 and localhost instead of this message
-            System.out.println("Usage: gradle runServer -Pport=8080 -q --console=plain");
+            System.out.println("Usage: gradle runTask2 -Pport=8080 -q --console=plain");
             System.exit(1);
         }
         port = -1;

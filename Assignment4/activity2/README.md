@@ -1,13 +1,11 @@
 #### Purpose:
-Demonstrate simple Client and Server communication using `SocketServer` and `Socket`classes.
-
+Play a simple matching game on a multi-threaded server, which allows multiple users to play the same game at the same time.
 Here a simple protocol is defined which uses protobuf. The client reads in a json file and then creates a protobuf object from it to send it to the server. The server reads it and sends back the calculated result. 
-
-The response is also a protobuf but only with a result string. 
 
 To see the proto file see: src/main/proto which is the default location for proto files. 
 
-Gradle is already setup to compile the proto files. 
+Gradle is already setup to compile the proto files.
+
 
 ### The procotol
 See the PROTOCOL.md for details.

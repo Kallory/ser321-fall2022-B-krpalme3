@@ -66,6 +66,9 @@ class SockBaseClient {
                 System.out.println("* \nWhat would you like to do? \n 1 - to see the leader board \n 2 - to enter a game \n 3 - quit the game");
                 boolean numberHappy = false;
                 int userOptionNum = 0;
+                boolean secondGuess = false;
+                String tile1 = "";
+                String tile2 = "";
                 while (numberHappy == false) {
                     try {
                         strToSend = stdin.readLine();
@@ -91,6 +94,46 @@ class SockBaseClient {
                     request = Protocol.createRequest(Request.OperationType.NEW, "", "");
                     request.writeDelimitedTo(out);
                     response = Response.parseDelimitedFrom(in);
+                    boolean playingGame = true;
+                    System.out.println(response.getMessage());
+                    System.out.println("Type: " + response.getResponseType());
+                    System.out.println("Board: \n" + response.getBoard());
+                    System.out.println("Eval: " + response.getEval());
+                    System.out.println("Second: " + response.getSecond());
+
+                    while (playingGame == true) {
+                        System.out.println("Select a tile to flip (eg a1)");
+                        if (secondGuess == false) {
+                            tile1 = stdin.readLine();
+                            if (tile1.equalsIgnoreCase("exit")) {
+                                System.exit(0);
+                            }
+                            request = Protocol.createRequest(Request.OperationType.TILE1, "", tile1);
+                            request.writeDelimitedTo(out);
+                            response = Response.parseDelimitedFrom(in);
+                            System.out.println(response.getMessage());
+                            System.out.println("Type: " + response.getResponseType());
+                            System.out.println("Board: \n" + response.getBoard());
+                            System.out.println("Eval: " + response.getEval());
+                            System.out.println("Second: " + response.getSecond());
+                            secondGuess = true;
+                        } else {
+                            tile2 = stdin.readLine();
+                            if (tile2.equalsIgnoreCase("exit")) {
+                                System.exit(0);
+                            }
+                            request = Protocol.createRequest(Request.OperationType.TILE2, "", tile2);
+                            request.writeDelimitedTo(out);
+                            response = Response.parseDelimitedFrom(in);
+                            System.out.println(response.getMessage());
+                            System.out.println("Type: " + response.getResponseType());
+                            System.out.println("Board: \n" + response.getBoard());
+                            System.out.println("Eval: " + response.getEval());
+                            System.out.println("Second: " + response.getSecond());
+
+                            secondGuess = false;
+                        }
+                    }
                 } else if (userOptionNum == 3) {
                     System.exit(0);
                 }

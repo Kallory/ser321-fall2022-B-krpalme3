@@ -20,14 +20,19 @@ public class SockBaseServer implements Runnable {
     OutputStream out = null;
     Socket clientSocket;
     int port = 9099; // default port
-    Game game;
+    static Game game;
     Response response;
     static int leaderEntryIndex = 0;
     static Response.Builder res;
+    static String tileString1;
+    static String tileString2;
+    static String msg2;
+    static char tileChar1 = '*';
+    static char tileChar2 = '+';
+    static boolean won = false;
 
-    public SockBaseServer(Socket sock, Game game){
+    public SockBaseServer(Socket sock){
         this.clientSocket = sock;
-        this.game = game;
         response = Protocol.createResponse(Response.ResponseType.GREETING, res, "", "", false, false, "");
         try {
             in = clientSocket.getInputStream();
@@ -74,8 +79,50 @@ public class SockBaseServer implements Runnable {
                         System.out.println(lead.getName() + ": " + lead.getWins());
 
                     }
+                } else if (op.getOperationType() == Request.OperationType.NEW) {
+                    String msg = "Starting new game";
+                    response = Protocol.createResponse(Response.ResponseType.PLAY, res, game.getBoard(), "", false, false, msg);
+                    response.writeDelimitedTo(out);
+                } else if (op.getOperationType() == Request.OperationType.TILE1) {
+                    tileString1 = op.getTile();
+                    String rowString = tileString1.substring(0, 1);
+                    String colString = tileString1.substring(1);
+                    int row = getRow(rowString);
+                    int col = getCol(colString);
+                    game.flipTile(row, col);
+                    tileChar1 = game.getTile(row, col);
+                    msg2 = "tile1Recieved";
+                    System.out.println("Board: \n" + game.showBoard());
+                    response = Protocol.createResponse(Response.ResponseType.PLAY, res, game.getBoard(), tileString1, false, false, msg2);
+                    response.writeDelimitedTo(out);
+                } else if (op.getOperationType() == Request.OperationType.TILE2) {
+                    tileString2 = op.getTile();
+                    String rowString2 = tileString2.substring(0, 1);
+                    String colString2 = tileString2.substring(1);
+                    int row2 = getRow(rowString2);
+                    int col2 = getCol(colString2);
+                    String rowString1 = tileString1.substring(0, 1);
+                    String colString1 = tileString1.substring(1);
+                    int row1 = getRow(rowString1);
+                    int col1 = getCol(colString1);
+                    game.flipTile(row2, col2);
+                    tileChar2 = game.getTile(row2, col2);
+                    msg2 = "tile2Recieved";
+                    System.out.println("Board: \n" + game.showBoard());
+                    boolean eval = false;
+                    if (tileChar2 == tileChar1) {
+                        eval = true;
+                        won = game.getWon();
+                    } else {
+                        eval = false;
+                        game.unflipTile(row1, col1, row2, col2);
+                    }
+                    response = Protocol.createResponse(Response.ResponseType.PLAY, res, game.getBoard(), tileString2, true, eval, msg2);
+                    response.writeDelimitedTo(out);
                 }
             }
+
+
 
 
             // Example how to start a new game and how to build a response with the board which you could then send to the server
@@ -166,6 +213,29 @@ public class SockBaseServer implements Runnable {
 
     }
 
+    public int getRow(String letter) {
+        if (letter.equalsIgnoreCase("a")) {
+            return 1;
+        } else if (letter.equalsIgnoreCase("b")) {
+            return 2;
+        } else if (letter.equalsIgnoreCase("c")) {
+            return 3;
+        }
+        else return 0;
+    }
+
+    public int getCol(String number) {
+        if (number.equalsIgnoreCase("1")) {
+            return 2;
+        } else if (number.equalsIgnoreCase("2")) {
+            return 4;
+        } else if (number.equalsIgnoreCase("3")) {
+            return 6;
+        } else if (number.equalsIgnoreCase("4")) {
+            return 8;
+        } else return 0;
+    }
+
 
     /**
      * Writing a new entry to our log
@@ -237,7 +307,8 @@ public class SockBaseServer implements Runnable {
 
 
     public static void main (String[] args) throws Exception {
-        Game game = new Game();
+        game = new Game();
+        game.newGame();
         res = Response.newBuilder()
                 .setResponseType(Response.ResponseType.LEADER);
         if (args.length != 2) {
@@ -267,7 +338,7 @@ public class SockBaseServer implements Runnable {
             clientSocket = serv.accept();
 //        clientManager = new ClientManager(clientSocket);
 
-            SockBaseServer server = new SockBaseServer(clientSocket, game);
+            SockBaseServer server = new SockBaseServer(clientSocket);
             Thread t = new Thread(server);
             t.start();
         }
