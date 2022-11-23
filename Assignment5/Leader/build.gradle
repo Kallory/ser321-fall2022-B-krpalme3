@@ -1,0 +1,87 @@
+apply plugin: 'application'
+apply plugin: 'java'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.json', name: 'json', version: '20200518'
+}
+
+mainClassName = 'Peer'
+
+def peerName = "test"
+def peer = 'localhost:8000'
+def leaderPort = "localhost:8000"
+def isLeader = false;
+def money = 500
+
+// task reading in the arguments if any given, if not the default from above will be used
+task arguments {
+    if (project.hasProperty("money")) {
+        peerName = project.getProperty("money")
+    }
+}
+
+task leader(type: JavaExec) {
+    description 'Runs leader'
+    classpath = sourceSets.main.runtimeClasspath
+    isLeader = true
+    peerName = "leader"
+    peer = "localhost:8000"
+    main = 'Peer'
+    standardInput = System.in
+
+    args peerName
+    args peer
+    args leaderPort
+    args isLeader
+}
+
+task node1(type: JavaExec) {
+    description 'Runs node1'
+    peerName = "node1"
+    peer = "localhost:8001"
+    isLeader = false
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'Peer'
+    standardInput = System.in
+
+    args peerName
+    args peer
+    args leaderPort
+    args isLeader
+    args money
+}
+
+task node2(type: JavaExec) {
+    description 'Runs node2'
+    peerName = "node2"
+    peer = "localhost:8002"
+    isLeader = false
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'Peer'
+    standardInput = System.in
+
+    args peerName
+    args peer
+    args leaderPort
+    args isLeader
+    args money
+}
+
+task client(type: JavaExec) {
+    description 'Runs client'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'Peer'
+    standardInput = System.in
+}
+

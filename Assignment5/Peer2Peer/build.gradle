@@ -1,0 +1,42 @@
+apply plugin: 'application'
+apply plugin: 'java'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.json', name: 'json', version: '20200518'
+}
+
+mainClassName = 'SimpleServer'
+
+def peerName = "test"
+def peer = 'localhost:8000'
+
+// task reading in the arguments if any given, if not the default from above will be used
+task arguments {
+    if (project.hasProperty("peerName")) {
+        peerName = project.getProperty("peerName")
+    }
+    if (project.hasProperty("peer")) {
+        peer = project.getProperty("peer")
+    }
+}
+
+task runPeer(type: JavaExec) {
+    description 'Runs peer'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'Peer'
+    standardInput = System.in
+
+    args peerName
+    args peer
+}
+
+
