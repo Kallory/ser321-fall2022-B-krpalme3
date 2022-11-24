@@ -19,6 +19,7 @@ def peer = 'localhost:8000'
 def leaderPort = "localhost:8000"
 def isLeader = false;
 def money = 500
+def isClient = false;
 
 // task reading in the arguments if any given, if not the default from above will be used
 task arguments {
@@ -78,10 +79,13 @@ task node2(type: JavaExec) {
 
 task client(type: JavaExec) {
     description 'Runs client'
-
+    peer = "localhost:8002"
     classpath = sourceSets.main.runtimeClasspath
 
-    main = 'Peer'
+    main = 'ClientThread'
     standardInput = System.in
+
+    args isClient
+    args peer
 }
 

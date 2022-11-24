@@ -14,7 +14,9 @@ public class Peer {
 
     private Set<SocketInfo> peers = new HashSet<SocketInfo>();
     private boolean leader = false;
+    private boolean client = false;
     private SocketInfo leaderSocket;
+    private SocketInfo clientSocket;
 
 
     public Peer(BufferedReader bufReader, String username,ServerThread serverThread){
@@ -48,6 +50,10 @@ public class Peer {
         if (args[3].equals("true")){
             System.out.println("Is leader");
             peer.setLeader(true, s);
+            peer.setClient(false, s);
+        } else if (args[0].equals("true")) {
+            System.out.println("Is client");
+            peer.setClient(true, s);
         } else {
             int money = Integer.parseInt(args[4]);
             System.out.println("Pawn with $" + money);
@@ -55,6 +61,7 @@ public class Peer {
             // add to list
             peer.addPeer(s);
             peer.setLeader(false, s);
+            peer.setClient(false, s);
 
             // send message to leader that we want to join
             peer.commLeader("{'type': 'join', 'username': '"+ username +"','ip':'" + serverThread.getHost() + "','port':'" + serverThread.getPort() + "'}");
@@ -66,11 +73,14 @@ public class Peer {
 
     }
 
-
-
     public void setLeader(boolean leader, SocketInfo leaderSocket){
         this.leader = leader;
         this.leaderSocket = leaderSocket;
+    }
+
+    public void setClient(boolean client, SocketInfo clientSocket) {
+        this.client = client;
+        this.clientSocket = clientSocket;
     }
 
     public boolean isLeader(){
@@ -108,6 +118,8 @@ public class Peer {
             SocketInfo s = new SocketInfo(hostPort[0], Integer.valueOf(hostPort[1]));
             peers.add(s);
         }
+
+
     }
 
     /**
